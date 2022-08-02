@@ -1,19 +1,38 @@
-const express = require('express')
-const app = express()
-const port = 4000
-const cors = require("cors")
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
 
-app.use(express.urlencoded({extended: true}))
-app.use(express.json())
-app.use(cors())
+const connect = () => {
+    const url = 'mongodb+srv://alibinauanov:alesh2004@cluster0.9pohocs.mongodb.net/tvshow_db?retryWrites=true&w=majority';
+    mongoose.connect(url, (err) => {
+        if (err) {
+            console.log(err);
+            process.exit();
+        }
 
-app.get("/", cors(), async(req, res) => {
-    res.status(200).send("This is working")
-})
+        console.log('Mongo connected');
+    });
+}
+connect();
 
-app.post("/post_name", async(req, res) => {
-    let {hours, period, category} = req.body
-    console.log(hours, period, category)
+const app = express();
+const db = mongoose.connection;
+const port = 8080;
+
+app.use(express.urlencoded({extended: true}));
+app.use(express.json());
+app.use(cors());
+
+app.post("/post_name",  (req, res) => {
+    const hours = req.body.hours;
+    const period = req.body.period;
+    const category = req.body.category;
+    const pattern = new RegExp('/' + category + '/');
+    console.log(category, pattern)
+
+    db.collection('tvshow_collection', async function (err, collection) {
+        console.log(await collection.find({}).limit(10))});
+        console.log("hrello");
 })
 
 app.listen(port, () => {
